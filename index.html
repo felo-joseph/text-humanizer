@@ -181,7 +181,7 @@
   const copyBtn = document.getElementById('copyBtn');
 
   input.addEventListener('input', () => {
-    const words = input.value.trim() ? input.value.trim().split(/\\s+/).length : 0;
+    const words = input.value.trim() ? input.value.trim().split(/\s+/).length : 0;
     wordcount.textContent = words + ' words';
   });
 
