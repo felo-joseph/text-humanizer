@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Text Humanizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FBF9F4;
+    --ink: #211F1C;
+    --ink-soft: #4A4640;
+    --pen: #A6332A;
+    --pen-soft: #C4574C;
+    --gold: #A9761F;
+    --gold-bg: #F6EEDC;
+    --border: #DCD5C6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 34px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    line-height: 1.15;
+  }
+  .sub {
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 520px;
+    line-height: 1.6;
+    margin: 0 0 32px;
+  }
+  .label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  textarea {
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 18px 20px;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink);
+    resize: vertical;
+    outline: none;
+  }
+  textarea:focus { border-color: var(--pen); }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A8A296; }
+  .link-btn {
+    background: none; border: none; padding: 0; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 13px; color: var(--ink-soft);
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .link-btn:hover { color: var(--pen); }
+  .actions { margin-top: 20px; display: flex; gap: 12px; align-items: center; }
+  button.primary {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    border: none;
+    border-radius: 3px;
+    padding: 12px 22px;
+    cursor: pointer;
+    background: var(--pen);
+    color: var(--paper);
+  }
+  button.primary:hover:not(:disabled) { background: var(--pen-soft); }
+  button.primary:disabled { opacity: 0.45; cursor: default; }
+  .error { font-size: 13px; color: var(--pen); }
+  .result {
+    margin-top: 48px;
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+    display: none;
+  }
+  .result-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .output {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--pen);
+    border-radius: 3px;
+    padding: 20px 24px;
+    font-size: 16px;
+    line-height: 1.75;
+    white-space: pre-wrap;
+  }
+  .notes-title { font-size: 13px; font-weight: 500; color: var(--gold); margin: 24px 0 10px; }
+  .note {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    background: var(--gold-bg);
+    border-radius: 3px;
+    padding: 8px 12px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .note span.mark { color: var(--gold); }
+  .voice-block { margin-top: 16px; display: none; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Editor's desk</div>
+    <h1>Text Humanizer</h1>
+    <p class="sub">Paste writing that sounds machine-made. Get back prose with a pulse: sentence rhythm, real opinions, and the AI tells struck out.</p>
+
+    <div class="label">Draft</div>
+    <textarea id="input" rows="9" placeholder="Paste your AI-sounding text here..."></textarea>
+    <div class="row">
+      <span class="mono" id="wordcount">0 words</span>
+      <button class="link-btn" id="toggleVoice">match my writing style +</button>
+    </div>
+
+    <div class="voice-block" id="voiceBlock">
+      <div class="label">A sample of your own writing (optional)</div>
+      <textarea id="voiceSample" rows="4" placeholder="Paste something you've written yourself, so the rewrite can match your voice..."></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="submitBtn">Mark up draft</button>
+      <span class="error" id="errorMsg"></span>
+    </div>
+
+    <div class="result" id="resultBlock">
+      <div class="result-head">
+        <div class="label" style="margin:0;">Edited</div>
+        <button class="link-btn" id="copyBtn">copy text</button>
+      </div>
+      <div class="output" id="output"></div>
+      <div id="notesWrap"></div>
+    </div>
+  </div>
+
+<script>
+  const input = document.getElementById('input');
+  const voiceSample = document.getElementById('voiceSample');
+  const toggleVoice = document.getElementById('toggleVoice');
+  const voiceBlock = document.getElementById('voiceBlock');
+  const wordcount = document.getElementById('wordcount');
+  const submitBtn = document.getElementById('submitBtn');
+  const errorMsg = document.getElementById('errorMsg');
+  const resultBlock = document.getElementById('resultBlock');
+  const output = document.getElementById('output');
+  const notesWrap = document.getElementById('notesWrap');
+  const copyBtn = document.getElementById('copyBtn');
+
+  input.addEventListener('input', () => {
+    const words = input.value.trim() ? input.value.trim().split(/\\s+/).length : 0;
+    wordcount.textContent = words + ' words';
+  });
+
+  toggleVoice.addEventListener('click', () => {
+    const showing = voiceBlock.style.display === 'block';
+    voiceBlock.style.display = showing ? 'none' : 'block';
+    toggleVoice.textContent = showing ? 'match my writing style +' : 'hide voice sample';
+  });
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(output.textContent);
+    copyBtn.textContent = 'copied';
+    setTimeout(() => { copyBtn.textContent = 'copy text'; }, 1800);
+  });
+
+  submitBtn.addEventListener('click', async () => {
+    const text = input.value.trim();
+    if (!text) return;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Marking up...';
+    errorMsg.textContent = '';
+    resultBlock.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/humanize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: text, voiceSample: voiceSample.value.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+
+      output.textContent = data.rewritten || '';
+      notesWrap.innerHTML = '';
+      if (Array.isArray(data.tells) && data.tells.length) {
+        const title = document.createElement('div');
+        title.className = 'notes-title';
+        title.textContent = "Editor's notes";
+        notesWrap.appendChild(title);
+        data.tells.forEach(t => {
+          const note = document.createElement('div');
+          note.className = 'note';
+          note.innerHTML = '<span class="mark">&#10008;</span><span>' + t.replace(/</g,'&lt;') + '</span>';
+          notesWrap.appendChild(note);
+        });
+      }
+      resultBlock.style.display = 'block';
+      resultBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {
+      errorMsg.textContent = 'Something went wrong rewriting that. Try again in a moment.';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Mark up draft';
+    }
+  });
+</script>
+</body>
+</html>
