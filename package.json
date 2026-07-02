@@ -1,8 +1,9 @@
 {
-  "name": "text-humanizer",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "vercel dev"
-  }
-}
+     "name": "text-humanizer",
+     "version": "1.0.0",
+     "private": true,
+     "type": "module",
+     "scripts": {
+       "dev": "vercel dev"
+     }
+   }
